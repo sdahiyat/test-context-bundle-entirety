@@ -1,0 +1,53 @@
+{
+  "overview": "This PR seeds a foods table with ~50 common foods (calories, protein, carbs, fat per serving) and ships a searchable food lookup API plus UI components. A new Next.js page at /foods exposes the search experience backed by a Supabase ilike query. This forms the foundational data layer for meal logging.",
+  "summary_json": {
+    "New route": "GET /api/foods/search?q=&category=",
+    "New page": "/foods",
+    "Min query length": "2 characters required before querying",
+    "Result limit": "20 foods per search",
+    "DB table": "foods (id, name, serving_size, serving_unit, calories_per_serving, protein_per_serving, carbs_per_serving, fat_per_serving, category, created_at)",
+    "Food categories": "protein, dairy, grain, fruit, vegetable, nut, fat, legume, snack, beverage",
+    "Seeded rows": "~50 common foods, idempotent via ON CONFLICT DO NOTHING",
+    "Env vars required": "NEXT_PUBLIC_SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, OPENAI_API_KEY"
+  },
+  "files_changed": [
+    {
+      "path": "src/lib/supabase.ts",
+      "summary": "Adds a createServiceClient() factory using SUPABASE_SERVICE_ROLE_KEY for privileged server-side Supabase access; also re-exports existing modular supabase helpers."
+    },
+    {
+      "path": "src/lib/openai.ts",
+      "summary": "Introduces a singleton OpenAI client wired to OPENAI_API_KEY for app-wide use."
+    },
+    {
+      "path": "supabase/migrations/20240101000001_seed_foods.sql",
+      "summary": "Creates the foods table (if not exists) and seeds ~50 common foods with nutritional data; idempotent via ON CONFLICT DO NOTHING."
+    },
+    {
+      "path": "src/types/food.ts",
+      "summary": "Defines shared Food, FoodSearchResult, FoodCategory types and FOOD_CATEGORIES/FOOD_CATEGORY_LABELS constants used across API and UI."
+    },
+    {
+      "path": "src/app/api/foods/search/route.ts",
+      "summary": "GET handler that searches foods by name (ilike) with optional category filter, requires 2+ char query, returns up to 20 results via service client."
+    },
+    {
+      "path": "src/components/food/FoodCard.tsx",
+      "summary": "Client component rendering a single food item card with nutritional macros, category badge, selection highlight, and keyboard accessibility."
+    },
+    {
+      "path": "src/components/food/FoodSearch.tsx",
+      "summary": "Client component with debounced search input, optional category filter dropdown, and result list using FoodCard; calls /api/foods/search."
+    },
+    {
+      "path": "src/app/foods/page.tsx",
+      "summary": "Food database page composing FoodSearch with a detail panel for the selected food's full nutritional breakdown."
+    },
+    {
+      "path": "src/app/page.tsx",
+      "summary": "Home page updated to include a 'Browse Food Database' CTA button linking to /foods."
+    }
+  ],
+  "extras": "Verify: run the migration against Supabase, then hit GET /api/foods/search?q=chicken and confirm results return. Risk: createServiceClient is used in an API route—ensure SUPABASE_SERVICE_ROLE_KEY is never exposed client-side. Follow-up: add full-text search index on foods.name for perf at scale.",
+  "fallback_text": "PR 'Food Database with Search' seeds a Supabase foods table with ~50 items via an idempotent SQL migration, adds a GET /api/foods/search endpoint (ilike, category filter, 20-result cap, 2-char minimum), ships FoodCard and FoodSearch React components, and exposes a /foods page. A createServiceClient helper using SUPABASE_SERVICE_ROLE_KEY was added to src/lib/supabase.ts for server-side queries. A singleton OpenAI client was also scaffolded. The home page now links to the food database. Required env vars: NEXT_PUBLIC_SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, OPENAI_API_KEY."
+}
