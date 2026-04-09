@@ -1,0 +1,59 @@
+{
+  "overview": "This PR implements a complete Supabase-based authentication system for the Next.js App Router app. It covers signup, login, logout, and password reset flows with form validation, a middleware layer that protects /dashboard routes and redirects authenticated users away from auth pages, and a client-side AuthContext for session state throughout the app.",
+  "summary_json": {
+    "Protected routes": "/dashboard (and sub-paths)",
+    "Auth routes": "/auth/login, /auth/signup, /auth/reset-password, /auth/update-password",
+    "Required env vars": "NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY, SUPABASE_SERVICE_ROLE_KEY",
+    "Supabase clients": "Browser singleton (client.ts), server service-role (server.ts), server anon/session (createServerComponentClient)",
+    "Auth context": "AuthProvider exposes user, session, loading, signOut via useAuthContext hook",
+    "File cap note": "Files beyond index 11 were omitted from preview; additional auth pages may exist"
+  },
+  "files_changed": [
+    {
+      "path": "src/types/database.ts",
+      "summary": "Defines typed Supabase Database schema including the profiles table with Row/Insert/Update shapes and goal enum."
+    },
+    {
+      "path": "src/lib/supabase/client.ts",
+      "summary": "Creates and exports a singleton browser-side Supabase client typed against Database, validated by required env vars."
+    },
+    {
+      "path": "src/lib/supabase/server.ts",
+      "summary": "Exports server-side Supabase clients: one with service-role key for privileged ops and one with anon key for session reads."
+    },
+    {
+      "path": "src/lib/supabase/index.ts",
+      "summary": "Re-exports all Supabase client factories from a single barrel file for clean imports."
+    },
+    {
+      "path": "src/middleware.ts",
+      "summary": "Next.js middleware that reads session cookies, redirects unauthenticated users away from /dashboard, and authenticated users away from auth pages."
+    },
+    {
+      "path": "src/contexts/AuthContext.tsx",
+      "summary": "Client-side React context providing user, session, loading state, and signOut; subscribes to Supabase auth state changes."
+    },
+    {
+      "path": "src/app/auth/layout.tsx",
+      "summary": "Shared centered card layout with NutriTrack branding wrapping all auth pages."
+    },
+    {
+      "path": "src/app/auth/login/page.tsx",
+      "summary": "Login page with email/password form, field-level validation, error display, and redirect to dashboard on success."
+    },
+    {
+      "path": "src/app/auth/login/loading.tsx",
+      "summary": "Suspense loading spinner shown while the login page is loading."
+    },
+    {
+      "path": "src/app/auth/signup/page.tsx",
+      "summary": "Signup page with email, password, and confirm-password fields, validation, and post-signup success message."
+    },
+    {
+      "path": "src/app/auth/reset-password/page.tsx",
+      "summary": "Password reset request page (full content truncated in preview)."
+    }
+  ],
+  "extras": "Verify: set all three env vars, hit /dashboard while logged out (should redirect to /auth/login), log in and confirm redirect to /dashboard, and test password reset email flow. Follow-up: files beyond index 11 were capped — confirm update-password page and any additional server actions are included. Risk: middleware uses persistSession:false with manual cookie forwarding; validate token refresh behavior in production.",
+  "fallback_text": "PR #2 ships a full Supabase Auth integration for a Next.js App Router app. Key pieces: typed Database schema (profiles table), browser and server Supabase client factories, Next.js middleware protecting /dashboard and bouncing logged-in users from /auth/* paths, a client AuthContext with user/session/loading/signOut, and login/signup/reset-password pages with validation and error handling. Requires NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY, and SUPABASE_SERVICE_ROLE_KEY env vars. Some files past index 11 were omitted from the diff preview."
+}
