@@ -1,0 +1,58 @@
+{
+  "overview": "This PR builds out the full Settings and Account Management feature, including user preferences (unit system, theme, notifications), email/password change, data export, and account deletion. A new user_settings table is added via Supabase migration with RLS policies, and a set of Next.js API routes plus a React hook power the UI. An admin Supabase client is introduced to handle privileged operations like account deletion.",
+  "summary_json": {
+    "New API routes": "GET/PUT /api/settings/preferences, POST /api/settings/update-email, POST /api/settings/update-password, GET /api/settings/export-data, DELETE /api/settings/delete-account",
+    "New DB table": "user_settings (uuid pk, user_id FK auth.users ON DELETE CASCADE, unit_system, theme, 4 notification booleans, unique per user)",
+    "RLS": "SELECT/INSERT/UPDATE policies scoped to auth.uid() = user_id on user_settings",
+    "New env var required": "SUPABASE_SERVICE_ROLE_KEY (used by supabase-admin client for account deletion)",
+    "Existing env vars": "NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY",
+    "Default settings": "unit_system: metric, theme: system, all notifications: true",
+    "Theme options": "light, dark, system",
+    "Unit system options": "metric, imperial",
+    "Files omitted by cap": "Some files beyond index 10 not shown (e.g. settings page components)"
+  },
+  "files_changed": [
+    {
+      "path": "src/types/settings.ts",
+      "summary": "Defines UserSettings interface, UnitSystem/Theme union types, and DEFAULT_SETTINGS constant."
+    },
+    {
+      "path": "src/lib/supabase-admin.ts",
+      "summary": "Creates a service-role Supabase client for privileged server-side operations like account deletion; requires SUPABASE_SERVICE_ROLE_KEY."
+    },
+    {
+      "path": "supabase/migrations/20240112_create_user_settings.sql",
+      "summary": "Adds user_settings table with constraints, index, and RLS policies (select/insert/update per user)."
+    },
+    {
+      "path": "src/app/api/settings/preferences/route.ts",
+      "summary": "GET/PUT route to fetch or upsert the authenticated user's preferences from user_settings."
+    },
+    {
+      "path": "src/app/api/settings/update-email/route.ts",
+      "summary": "POST route to validate and update the authenticated user's email via Supabase auth."
+    },
+    {
+      "path": "src/app/api/settings/update-password/route.ts",
+      "summary": "POST route to re-authenticate and update the authenticated user's password."
+    },
+    {
+      "path": "src/app/api/settings/export-data/route.ts",
+      "summary": "GET route that aggregates user profile and related data and returns it as a downloadable JSON export."
+    },
+    {
+      "path": "src/app/api/settings/delete-account/route.ts",
+      "summary": "DELETE route that cascades deletion of user meal data and then removes the auth user via the admin client."
+    },
+    {
+      "path": "src/hooks/useSettings.ts",
+      "summary": "Client-side React hook that fetches settings on mount, exposes optimistic updateSettings, and manages loading/error state."
+    },
+    {
+      "path": "src/components/settings/SettingsNav.tsx",
+      "summary": "Client component providing navigation UI for the settings sections."
+    }
+  ],
+  "extras": "Verify: ensure SUPABASE_SERVICE_ROLE_KEY is set in all server environments before deploying; test account deletion cascade against meal_items and meals tables. Follow-up: confirm the UPDATE RLS policy (truncated in migration preview) is complete; consider rate-limiting email/password change endpoints.",
+  "fallback_text": "PR #7 adds a full settings and account management system. A new user_settings Supabase table (with RLS) stores per-user unit system, theme, and notification preferences. Five new Next.js API routes handle preferences CRUD, email change, password change, data export, and account deletion. Account deletion uses a new service-role admin client (needs SUPABASE_SERVICE_ROLE_KEY env var). A useSettings hook provides optimistic client-side state management. A SettingsNav component rounds out the UI. The migration file was partially truncated so the UPDATE RLS policy should be verified before merging."
+}
