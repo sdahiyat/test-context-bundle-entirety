@@ -1,0 +1,53 @@
+{
+  "overview": "This PR introduces a shared UI component library and app navigation shell for a mobile-first Next.js app. It adds form primitives (Button, Input, Select, Textarea), feedback components (LoadingSpinner, Toast, ErrorBoundary), and layout primitives (Card, Badge), all styled with Tailwind. Additional files beyond index 9 were omitted due to preview caps but are part of the same component suite.",
+  "summary_json": {
+    "Design system": "Tailwind CSS with primary-600 color tokens, rounded-2xl cards, focus-ring patterns",
+    "Button variants": "primary, secondary, ghost, danger; sizes sm/md/lg; supports isLoading, leftIcon, rightIcon, fullWidth",
+    "Toast system": "Context-based (ToastProvider + useToast); supports success, error, warning, info with auto-dismiss",
+    "ErrorBoundary": "Class component with ErrorFallback functional component and resetError callback",
+    "Textarea": "Optional character count display via showCount + maxLength props",
+    "Card sub-components": "Card, CardHeader (with title, subtitle, action slot)",
+    "Files omitted": "Files beyond index 9 not shown due to cap; likely navigation shell and barrel exports",
+    "Breaking changes": "None; all new files"
+  },
+  "files_changed": [
+    {
+      "path": "src/components/ui/Button.tsx",
+      "summary": "Typed Button component with four variants, three sizes, loading spinner, and icon slots."
+    },
+    {
+      "path": "src/components/ui/Input.tsx",
+      "summary": "Accessible Input with label, error state, helper text, and left/right icon slots using useId."
+    },
+    {
+      "path": "src/components/ui/Select.tsx",
+      "summary": "Accessible Select wrapping native element with options array prop, error styling, and placeholder support."
+    },
+    {
+      "path": "src/components/ui/Textarea.tsx",
+      "summary": "Textarea with optional character counter that tracks length for both controlled and uncontrolled usage."
+    },
+    {
+      "path": "src/components/ui/LoadingSpinner.tsx",
+      "summary": "Animated spinner with size/color variants and an optional full-screen overlay mode."
+    },
+    {
+      "path": "src/components/ui/Toast.tsx",
+      "summary": "Context-driven toast notification system with typed severity icons and auto-dismiss via duration prop."
+    },
+    {
+      "path": "src/components/ui/ErrorBoundary.tsx",
+      "summary": "React class-based ErrorBoundary with a functional ErrorFallback UI and a resetError action button."
+    },
+    {
+      "path": "src/components/ui/Card.tsx",
+      "summary": "Card layout primitive with variant and padding props, plus CardHeader sub-component with action slot."
+    },
+    {
+      "path": "src/components/ui/Badge.tsx",
+      "summary": "Small Badge component for status/label chips (content truncated, full implementation not visible)."
+    }
+  ],
+  "extras": "Verify: wrap app root with ToastProvider so useToast works app-wide; confirm navigation shell files (omitted after index 9) include bottom-tab layout. Follow-up: add barrel export (index.ts) for the ui/ directory if not already present in omitted files.",
+  "fallback_text": "PR #4 adds the shared UI component library and navigation shell. New files: Button (4 variants, loading state), Input, Select, Textarea (with char count), LoadingSpinner (overlay support), Toast (context provider, 4 types, auto-dismiss), ErrorBoundary with fallback UI, Card with CardHeader, and Badge. All components use Tailwind and follow a primary-600 color system. The Toast system requires ToastProvider at the app root. Navigation shell and any barrel exports are in files omitted due to preview caps. No breaking changes; all additions."
+}
