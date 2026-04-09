@@ -1,0 +1,12 @@
+{
+  "schema": "cofabric.task_status.v1",
+  "task_number": 8,
+  "title": "OpenAI Integration and AI Photo Meal Logging",
+  "status": "pending",
+  "priority": "medium",
+  "description": "",
+  "completion_summary": null,
+  "pr_url": null,
+  "pr_doc": null,
+  "updated_at": "2026-04-09T17:51:27.652Z"
+}

@@ -1,0 +1,12 @@
+{
+  "schema": "cofabric.task_status.v1",
+  "task_number": 9,
+  "title": "Progress Tracking with Charts",
+  "status": "pending",
+  "priority": "medium",
+  "description": "",
+  "completion_summary": null,
+  "pr_url": null,
+  "pr_doc": null,
+  "updated_at": "2026-04-09T17:51:28.033Z"
+}
