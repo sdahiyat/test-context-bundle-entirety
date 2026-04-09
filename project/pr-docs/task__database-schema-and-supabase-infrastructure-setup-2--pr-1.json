@@ -1,0 +1,55 @@
+{
+  "overview": "This PR establishes the full PostgreSQL database schema for the NutriTrack app in Supabase, covering tables for profiles, meals, meal_items, foods, and progress_logs with RLS policies and indexes. It also wires up the Supabase client utilities (browser, server, and middleware) under @/lib/supabase and adds typed TypeScript interfaces generated from the schema. This data layer is the foundation all other features will build on.",
+  "summary_json": {
+    "Tables created": "profiles, meals, meal_items, foods, progress_logs",
+    "Security": "Row Level Security (RLS) policies applied to all tables",
+    "Env vars required": "NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY, SUPABASE_SERVICE_ROLE_KEY, OPENAI_API_KEY",
+    "New packages": "@supabase/ssr ^0.5.0, @supabase/supabase-js ^2.39.0, openai ^4.24.0",
+    "Supabase client exports": "createClient (browser), createServerClient (server), updateSession (middleware)",
+    "Middleware matcher": "All routes except _next/static, _next/image, favicon.ico, and image file extensions"
+  },
+  "files_changed": [
+    {
+      "path": "supabase/migrations/20240101000000_initial_schema.sql",
+      "summary": "Defines all NutriTrack tables, foreign key relationships, indexes, and RLS policies in a single initial migration."
+    },
+    {
+      "path": "src/lib/supabase/types.ts",
+      "summary": "TypeScript Database interface hand-generated from the schema, providing strongly-typed Row, Insert, and Update shapes for every table."
+    },
+    {
+      "path": "src/lib/supabase/client.ts",
+      "summary": "Browser-side Supabase client factory using @supabase/ssr's createBrowserClient, with a lazy singleton export for client components."
+    },
+    {
+      "path": "src/lib/supabase/server.ts",
+      "summary": "Async server-side Supabase client factory that reads and writes cookies via next/headers for server components and route handlers."
+    },
+    {
+      "path": "src/lib/supabase/middleware.ts",
+      "summary": "updateSession helper that refreshes the Supabase auth session on every request by propagating cookies through Next.js middleware."
+    },
+    {
+      "path": "src/lib/supabase/index.ts",
+      "summary": "Barrel file re-exporting all client helpers and DB types from the supabase lib directory for clean imports."
+    },
+    {
+      "path": "src/middleware.ts",
+      "summary": "Next.js middleware entry point that delegates to updateSession to keep auth sessions alive across all non-static routes."
+    },
+    {
+      "path": "src/types/index.ts",
+      "summary": "Application-level composed types (MealWithItems, DailyNutritionSummary, NutritionGoalProgress, UserGoals) built on top of the DB types."
+    },
+    {
+      "path": "package.json",
+      "summary": "Adds @supabase/ssr, @supabase/supabase-js, and openai as runtime dependencies alongside the existing Next.js 14 stack."
+    },
+    {
+      "path": ".env.example",
+      "summary": "Documents all required environment variables (Supabase URL, anon key, service role key, OpenAI key) with instructions to copy to .env.local."
+    }
+  ],
+  "extras": "To verify: run the migration against a Supabase project (`supabase db push`), confirm all tables and RLS policies are created, then smoke-test auth session refresh via the middleware. Follow-up risk: service role key must never be exposed client-side; ensure SUPABASE_SERVICE_ROLE_KEY is only used in server-only code paths.",
+  "fallback_text": "PR #1 sets up the NutriTrack database foundation. A single Supabase migration creates profiles, meals, meal_items, foods, and progress_logs tables with RLS policies and indexes. TypeScript types are hand-authored to match the schema. Three Supabase client utilities are added under src/lib/supabase: a browser client singleton, an async server client using next/headers cookies, and a middleware session-refresh helper. Next.js middleware is wired to call updateSession on every non-static route. Application-level composed types (MealWithItems, DailyNutritionSummary, etc.) live in src/types/index.ts. Required env vars are NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY, SUPABASE_SERVICE_ROLE_KEY, and OPENAI_API_KEY. New deps: @supabase/ssr, @supabase/supabase-js, openai."
+}
