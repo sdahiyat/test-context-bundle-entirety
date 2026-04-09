@@ -1,0 +1,59 @@
+{
+  "overview": "This PR ships the complete manual meal logging system: food search API, meal CRUD routes, portion/nutrition calculation helpers, TypeScript types, DB schema migrations, and seeded food data. It supports breakfast/lunch/dinner/snack meal types with custom timestamps and per-item portion tracking. Additional UI/component files beyond index 11 were omitted due to context caps.",
+  "summary_json": {
+    "API routes added": "GET /api/foods, GET /api/foods/[id], GET+POST /api/meals, GET+PATCH+DELETE /api/meals/[id], POST /api/meals/[id]/items",
+    "Meal types supported": "breakfast, lunch, dinner, snack",
+    "Auth pattern": "createRouteHandlerClient for session checks on meal routes; createServiceClient for DB writes",
+    "Env vars required": "NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY, SUPABASE_SERVICE_ROLE_KEY, OPENAI_API_KEY",
+    "DB migrations": "001_initial_schema.sql (users_profile, foods, meals, meal_items tables), 002_seed_foods.sql (verified food records at 100g base)",
+    "Omitted files": "Files beyond index 11 skipped per cap_note — likely UI components for meal logging flow"
+  },
+  "files_changed": [
+    {
+      "path": "src/lib/supabase.ts",
+      "summary": "Exports anon client, admin client, and createServiceClient factory for use across API routes."
+    },
+    {
+      "path": "src/lib/openai.ts",
+      "summary": "Initializes and exports a shared OpenAI client using OPENAI_API_KEY."
+    },
+    {
+      "path": "supabase/migrations/001_initial_schema.sql",
+      "summary": "Creates users_profile, foods, meals, and meal_items tables with nutritional columns and RLS-ready structure."
+    },
+    {
+      "path": "supabase/migrations/002_seed_foods.sql",
+      "summary": "Seeds verified food records (per 100g) across breakfast, lunch, and dinner categories."
+    },
+    {
+      "path": "src/types/nutrition.ts",
+      "summary": "Defines Food, Meal, MealItem, MealType, CreateMealRequest, UpdateMealRequest, and NutritionSummary TypeScript interfaces."
+    },
+    {
+      "path": "src/lib/nutrition.ts",
+      "summary": "Utility functions to calculate per-item nutrition scaled by quantity, meal totals, and daily totals."
+    },
+    {
+      "path": "src/app/api/foods/route.ts",
+      "summary": "GET endpoint for food search by name with a minimum 2-char query and 20-result limit."
+    },
+    {
+      "path": "src/app/api/foods/[id]/route.ts",
+      "summary": "GET endpoint to fetch a single food record by UUID, returns 404 if not found."
+    },
+    {
+      "path": "src/app/api/meals/route.ts",
+      "summary": "GET lists meals for authenticated user filtered by date/meal_type; POST creates a meal with items and computed nutrition totals."
+    },
+    {
+      "path": "src/app/api/meals/[id]/route.ts",
+      "summary": "GET fetches a single meal with nested items and foods; PATCH updates meal metadata; DELETE removes meal (auth-guarded, ownership checked)."
+    },
+    {
+      "path": "src/app/api/meals/[id]/items/route.ts",
+      "summary": "POST adds a food item with portion size to an existing meal and recalculates totals."
+    }
+  ],
+  "extras": "Run both SQL migrations in order before testing. Verify food search returns results via GET /api/foods?q=egg. Confirm meal POST requires valid session cookie. Follow-up: UI components were cut by context cap and should be reviewed separately; also confirm RLS policies are in place on meals/meal_items since routes use service role for writes.",
+  "fallback_text": "PR 6 adds the full manual meal logging backend: Supabase schema (users_profile, foods, meals, meal_items), seeded food data, TypeScript nutrition types, nutrition calculation helpers, and Next.js API routes for food search and meal CRUD. Meals support breakfast/lunch/dinner/snack types and custom logged_at timestamps. Auth is enforced via session checks on all meal routes. Required env vars are NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY, SUPABASE_SERVICE_ROLE_KEY, and OPENAI_API_KEY. Files past index 11 (likely UI components) were omitted by context cap and need separate review."
+}
