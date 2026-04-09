@@ -1,0 +1,65 @@
+{
+  "overview": "This PR implements the user onboarding flow and profile management system. After first login, users are guided through a 4-step wizard collecting personal info, body metrics, activity level, and goal type, then shown calculated calorie/macro targets. A profile API route and Supabase migration for the user_profiles table are included.",
+  "summary_json": {
+    "New API routes": "GET/PUT /api/profile",
+    "New pages": "/onboarding (server), /onboarding wizard (client)",
+    "Onboarding steps": "personal_info, body_metrics, activity_goals, calorie_targets",
+    "Calorie calculation": "Mifflin-St Jeor BMR + TDEE + goal adjustment (±500 kcal)",
+    "Goal types": "weight_loss, maintenance, muscle_gain",
+    "Required env vars": "NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY, SUPABASE_SERVICE_ROLE_KEY, OPENAI_API_KEY",
+    "DB migration": "supabase/migrations/001_user_profiles.sql — new user_profiles table with RLS",
+    "Breaking change": "Supabase client split into client.ts/server.ts; src/lib/supabase.ts now re-exports for compatibility"
+  },
+  "files_changed": [
+    {
+      "path": "src/lib/supabase.ts",
+      "summary": "Compatibility shim re-exporting supabase and supabaseAdmin from the new split client/server modules."
+    },
+    {
+      "path": "src/lib/supabase/client.ts",
+      "summary": "Browser-side Supabase client typed against the Database schema, initialized from public env vars."
+    },
+    {
+      "path": "src/lib/supabase/server.ts",
+      "summary": "Server-side Supabase client and admin client factories (no session persistence) using service role key."
+    },
+    {
+      "path": "src/lib/supabase/index.ts",
+      "summary": "Barrel export combining client and server Supabase exports."
+    },
+    {
+      "path": "src/lib/openai.ts",
+      "summary": "OpenAI client singleton initialized from OPENAI_API_KEY env var with a soft warning if missing."
+    },
+    {
+      "path": "src/lib/nutrition.ts",
+      "summary": "Nutrition utility library implementing Mifflin-St Jeor BMR, TDEE, target calorie, and macro calculation functions."
+    },
+    {
+      "path": "src/types/profile.ts",
+      "summary": "TypeScript types for UserProfile, OnboardingStep enum, and OnboardingFormData used across the onboarding flow."
+    },
+    {
+      "path": "src/types/database.ts",
+      "summary": "Supabase Database type definitions covering profiles and user_profiles tables for typed query results."
+    },
+    {
+      "path": "supabase/migrations/001_user_profiles.sql",
+      "summary": "Creates the user_profiles table with RLS policies, indexes, and an updated_at trigger."
+    },
+    {
+      "path": "src/app/api/profile/route.ts",
+      "summary": "Next.js route handler exposing GET and PUT endpoints to fetch and update the authenticated user's profile."
+    },
+    {
+      "path": "src/app/onboarding/page.tsx",
+      "summary": "Server component for /onboarding that guards auth, redirects completed users to dashboard, and renders the wizard."
+    },
+    {
+      "path": "src/app/onboarding/OnboardingWizard.tsx",
+      "summary": "Client-side 4-step wizard component managing form state, step navigation, and final profile submission."
+    }
+  ],
+  "extras": "Verify: run supabase migration 001, set all three env vars, complete onboarding as a new user and confirm redirect to /dashboard. Follow-ups: remaining files were omitted by cap (12+ files); step sub-components (PersonalInfoStep, BodyMetricsStep, ActivityGoalsStep, CalorieTargetsStep) and profile page were not reviewed — confirm they exist and are wired correctly.",
+  "fallback_text": "PR #5 adds a full user onboarding wizard and profile management system. A 4-step client wizard (personal info → body metrics → activity & goals → calorie targets) collects user data and uses Mifflin-St Jeor calculations to suggest calorie and macro targets. Data is persisted to a new user_profiles Supabase table (migration 001) with RLS. A GET/PUT /api/profile route handles reads and updates. The Supabase client is refactored into split client.ts/server.ts files with a compatibility re-export shim. Required env vars: NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY, SUPABASE_SERVICE_ROLE_KEY, OPENAI_API_KEY. Some files (step sub-components, profile screen) were not reviewable due to context cap."
+}
