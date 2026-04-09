@@ -1,0 +1,61 @@
+{
+  "overview": "This PR establishes the shared API infrastructure under src/lib/api/ and wires up the first concrete route handlers under src/app/api/. It introduces consistent patterns for response formatting, authentication checks, Zod-based request validation, typed error classes, and pagination helpers. A health-check route, meals CRUD routes, and a food search route are added as the first consumers of these patterns.",
+  "summary_json": {
+    "New routes": "GET /api/health, GET/POST /api/meals, GET/PATCH/DELETE /api/meals/[id], GET /api/foods/search",
+    "Auth mechanism": "Supabase JWT via cookies using @supabase/ssr; no Authorization header needed for browser clients",
+    "Response envelope": "All responses wrapped in { success, data?, error? }; helpers: successResponse, createdResponse, noContentResponse, errorResponse, badRequest, unauthorized, forbidden, notFound, unprocessable, internalError",
+    "Validation": "Zod schemas; validateBody() for JSON body, validateQuery() for URLSearchParams; returns 400/422 on failure",
+    "Error handling": "withErrorHandler() HOF wraps route handlers; AppError subclasses (ValidationError, NotFoundError, UnauthorizedError) map to typed HTTP responses",
+    "Pagination": "PaginationParams + PaginatedResponse types; getPaginationRange() and buildPaginatedResponse() utilities",
+    "Env vars required": "NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY",
+    "Breaking changes": "None; this is new infrastructure"
+  },
+  "files_changed": [
+    {
+      "path": "src/lib/api/response.ts",
+      "summary": "Defines the ApiResponse envelope type and all HTTP response helper functions (success, error, 400/401/403/404/422/500)."
+    },
+    {
+      "path": "src/lib/api/auth.ts",
+      "summary": "Provides getAuthenticatedUser() and requireAuth() using Supabase SSR cookies for use in Next.js API route handlers."
+    },
+    {
+      "path": "src/lib/api/validation.ts",
+      "summary": "Exports validateBody() and validateQuery() helpers that run Zod schemas and return typed errors or validated data."
+    },
+    {
+      "path": "src/lib/api/errors.ts",
+      "summary": "Defines AppError and subclasses (ValidationError, NotFoundError, UnauthorizedError) plus withErrorHandler() HOF for automatic error mapping."
+    },
+    {
+      "path": "src/lib/api/pagination.ts",
+      "summary": "Defines PaginationParams/PaginatedResponse types and helpers getPaginationRange() and buildPaginatedResponse() for offset-based pagination."
+    },
+    {
+      "path": "src/lib/api/index.ts",
+      "summary": "Barrel export re-exporting all lib/api modules for single-import convenience."
+    },
+    {
+      "path": "src/app/api/health/route.ts",
+      "summary": "Health-check endpoint returning status, timestamp, and version; wrapped with withErrorHandler."
+    },
+    {
+      "path": "src/app/api/README.md",
+      "summary": "Documents the API contract: base URL, auth mechanism, content-type, and response envelope format."
+    },
+    {
+      "path": "src/app/api/meals/route.ts",
+      "summary": "GET (paginated, filterable by date) and POST handlers for meals; enforces auth, validates inputs with Zod, interacts with Supabase."
+    },
+    {
+      "path": "src/app/api/meals/[id]/route.ts",
+      "summary": "GET, PATCH, and DELETE handlers for a single meal by ID; enforces ownership via forbidden() and returns 404 when missing."
+    },
+    {
+      "path": "src/app/api/foods/search/route.ts",
+      "summary": "Authenticated food search endpoint accepting query string q and limit, running a Supabase full-text/ilike query."
+    }
+  ],
+  "extras": "Verify: hit GET /api/health and expect { success: true, data: { status: 'ok', ... } }. Confirm auth rejection returns 401 JSON envelope. Follow-ups: omitted files (index 11+) may contain additional routes not documented here; review cap_note. Pagination schema (paginationSchema) is imported from lib/api but not seen in the previewed files — confirm it's exported from validation.ts or a separate file.",
+  "fallback_text": "PR #8 adds the foundational API layer for this Next.js app. A lib/api/ module provides: typed response helpers (success, error, 400/401/403/404/422/500), a requireAuth() utility using Supabase SSR cookie-based JWTs, Zod-powered validateBody()/validateQuery() functions, AppError subclasses with a withErrorHandler() HOF, and offset-based pagination utilities. Concrete routes added: GET /api/health, GET+POST /api/meals (paginated, date-filterable), GET+PATCH+DELETE /api/meals/[id] (ownership-checked), and GET /api/foods/search. Env vars needed: NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY. No breaking changes. Some files were omitted due to context caps."
+}
