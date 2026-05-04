@@ -1,0 +1,52 @@
+{
+  "overview": "Implements a complete manual meal logging system with full CRUD API routes for meals, food search integration (including OpenFoodFacts), portion tracking, and recent/frequent food quick-access endpoints. An in-memory store backs all data with TypeScript interfaces for Meal, MealItem, Food, and UserFoodHistory. Auth is handled via a demo Bearer-token utility that falls back to a demo user.",
+  "summary_json": {
+    "New API routes": "GET/POST /api/meals, GET/PUT/DELETE /api/meals/[id], GET /api/meals/summary/daily, GET /api/foods, POST /api/foods, GET /api/foods/search, GET /api/foods/recent, GET /api/foods/frequent",
+    "Meal types supported": "breakfast, lunch, dinner, snack",
+    "Custom timestamps": "loggedAt ISO string accepted on create/update",
+    "Food sources": "usda, custom, openfoodfacts",
+    "Auth mechanism": "Base64-encoded JSON Bearer token; demo fallback via getAuthUserOrDemo",
+    "Data persistence": "In-memory singleton (mealsStore, foodsStore, foodHistoryStore) — not durable across restarts",
+    "Breaking changes": "None; all new routes"
+  },
+  "files_changed": [
+    {
+      "path": "project/src/lib/store.ts",
+      "summary": "Defines in-memory Maps and TypeScript interfaces (Meal, MealItem, Food, UserFoodHistory) plus helpers like computeTotals, generateId, and incrementFoodUsage."
+    },
+    {
+      "path": "project/src/lib/auth.ts",
+      "summary": "Provides getAuthUser and createToken utilities using base64-encoded JSON tokens, plus a getAuthUserOrDemo fallback for unauthenticated demo use."
+    },
+    {
+      "path": "project/src/app/api/meals/route.ts",
+      "summary": "GET (list with date/type filters and pagination) and POST (create meal, auto-compute totals, track food usage) handlers for /api/meals."
+    },
+    {
+      "path": "project/src/app/api/meals/[id]/route.ts",
+      "summary": "GET, PUT, and DELETE handlers for a single meal by ID with ownership checks."
+    },
+    {
+      "path": "project/src/app/api/meals/summary/daily/route.ts",
+      "summary": "GET handler that aggregates meals by calendar date and returns per-day macro totals for a date range."
+    },
+    {
+      "path": "project/src/app/api/foods/route.ts",
+      "summary": "GET (list all foods) and POST (create custom food with required-field validation) handlers for /api/foods."
+    },
+    {
+      "path": "project/src/app/api/foods/search/route.ts",
+      "summary": "GET handler that searches local foodsStore and falls back to OpenFoodFacts API, normalizing results to a consistent shape."
+    },
+    {
+      "path": "project/src/app/api/foods/recent/route.ts",
+      "summary": "GET handler returning the 10 most recently used foods for the authenticated user, enriched with full food details."
+    },
+    {
+      "path": "project/src/app/api/foods/frequent/route.ts",
+      "summary": "GET handler returning the most frequently used foods for the authenticated user sorted by useCount."
+    }
+  ],
+  "extras": "Verify: spin up dev server and hit each route with a demo Bearer token (base64 of {\"id\":\"demo\",\"email\":\"demo@example.com\"}). Risk: in-memory store loses all data on server restart — swap for a real DB before production. Files beyond index 9 were omitted by cap; review any UI components or additional routes in the branch directly.",
+  "fallback_text": "This PR ships the full manual meal logging backend for a Next.js app. A new in-memory store (store.ts) holds meals and foods with rich TypeScript interfaces. Auth.ts adds a demo Bearer-token helper. API routes cover meal CRUD (/api/meals, /api/meals/[id]), daily summary aggregation, food listing and custom food creation, OpenFoodFacts-backed search, and per-user recent/frequent food history. Meal types (breakfast/lunch/dinner/snack) and custom ISO timestamps are supported throughout. No breaking changes; all additions. The store is not persistent — production use requires a real database."
+}
